@@ -1,3 +1,3 @@
-# React Starter
+# CS50 - Final
 
-- Run `npm start`
+- [Ideas](https://github.com/Auspicus/CS50-Final/blob/master/IDEAS.md)
