@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var database = require('bindings')('database');
+
 var app = express();
 
 app.use(logger('dev'));
@@ -11,6 +13,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'web')));
+
+app.post('/execute', (req, res) => {
+  var queryResult;
+  console.log(req.body);
+  try {
+    queryResult = database(req.body.query);
+  } catch (err) {
+    console.error(err);
+    res.send(JSON.stringify({
+      error: err.toString()
+    }));
+    return;
+  }
+  
+  console.log(queryResult);
+  res.send(queryResult);
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -24,8 +43,9 @@ app.use(function(err, req, res, next) {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  var statusCode = err.status || 500;
+  res.status(statusCode);
+  res.send(statusCode + ' error');
 });
 
 module.exports = app;
