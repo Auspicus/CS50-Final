@@ -1,45 +1,95 @@
 import React, { Component } from 'react';
 import Helmet from 'react-helmet';
+import {XYPlot, YAxis, HorizontalGridLines, LineSeries} from 'react-vis';
+import 'react-vis/dist/style.css';
 
-import QueryInput from '../../components/QueryInput';
+import './styles.css';
+
+class Graph extends Component {
+  constructor(props) {
+    super(props);
+    
+    this.state = {
+      c: [],
+      js: [],
+    }
+  }
+
+  calculateJS() {
+    setTimeout(() => {
+      let fib1 = 0;
+      let fib2 = 1;
+      let fib3 = 2;
+  
+      var before = Date.now();
+      while (fib1 + fib2 < (Math.pow(2, 31) - 1))
+      {
+        fib3 = fib1 + fib2;
+        fib1 = fib2;
+        fib2 = fib3;
+      }
+      var after = Date.now();
+  
+      this.setState({
+        js: [...this.state.js, after - before],
+      });
+      this.calculateJS();
+    });
+  }
+
+  calculateC() {
+    fetch('/execute', {
+      method: 'POST',
+    })
+    .then(response => response.json())
+    .then((response) => {
+      this.setState({
+        c: [...this.state.c, response.result],
+      });
+      this.calculateC();
+    })
+    .catch(console.error)
+  }
+
+  componentDidMount() {
+    this.calculateJS();
+    this.calculateC();
+  }
+
+  render() {
+    return (
+      <div className="graph">
+        <XYPlot
+          margin={{ left: 60 }}
+          style={{
+            margin: '0 auto',
+          }}
+          width={300}
+          height={300}>
+          <HorizontalGridLines />
+          <LineSeries
+            data={this.state.c.map((y, x) => ({ x, y: y }))}/>
+          <LineSeries
+            data={this.state.js.map((y, x) => ({ x, y: y / 1000 }))}/>
+          <YAxis title="Calculation time (sec)" />
+        </XYPlot>
+      </div>
+    );
+  }
+}
 
 class Home extends Component {
   render() {
     return (
       <React.Fragment>
-        <Helmet title="NodeJS to C++ Binding Example - Database" />
+        <Helmet title="NodeJS to C++ Bindings - Fibonacci" />
         <div style={{
           margin: '0 auto',
           maxWidth: '560px',
           textAlign: 'center',
         }}>
-          <h1>Database in C++</h1>
-          <p>
-            This is a proof of concept for a web binding to a basic C++ database application. You can enter SQL syntax below and the server will run it in the C++ binding.
-          </p>
-          <details>
-            <summary>Supported commands</summary>
-            <pre style={{ textAlign: 'left' }}>
-              <code>
-                CREATE TABLE tableName<br/>  (column1 type, column2 type, ...columnN type);<br/>
-                <br/>
-                INSERT INTO tableName (column1, column2, ...columnN)<br/>  VALUES (value1, value2, ...valueN);<br />
-                <br/>
-                SELECT * FROM tableName;<br/>
-              </code>
-            </pre>
-          </details>
-          <details>
-            <summary>Supported data types</summary>
-            <ul style={{ textAlign: 'left' }}>
-              <li>BOOLEAN</li>
-              <li>INTEGER</li>
-              <li>NUMERIC</li>
-              <li>TEXT</li>
-            </ul>
-          </details>
-          <p style={{ fontStyle: 'italic' }}>Note: the SQL parser is space sensitive so make sure you space it exact and don't include new lines between commands.</p>
-          <QueryInput />
+          <h1>Graph of Fibonacci Series</h1>
+          <Graph />
         </div>
       </React.Fragment>
     );

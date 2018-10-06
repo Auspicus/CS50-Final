@@ -49,3 +49,9 @@ I enjoyed optimizing data lookups using specific hash functions and data structu
   - support select by string
   - allows for implementation of C bindings to NodeJS
   - can implement web based UI
+
+
+## Fibonacci Series
+
+- Performance of C++
+- Real time benchmark

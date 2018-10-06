@@ -4,7 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var database = require('bindings')('database');
+var fibonacci = require('bindings')('fibonacci');
 
 var app = express();
 
@@ -15,20 +15,19 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'web')));
 
 app.post('/execute', (req, res) => {
-  var queryResult;
-  console.log(req.body);
   try {
-    queryResult = database(req.body.query);
+    fibonacci((time) => {
+      res.json({
+        result: time,
+      });
+    });
   } catch (err) {
     console.error(err);
-    res.send(JSON.stringify({
+    res.status(500).json({
       error: err.toString()
-    }));
+    });
     return;
   }
-  
-  console.log(queryResult);
-  res.send(queryResult);
 });
 
 // catch 404 and forward to error handler
