@@ -31,5 +31,5 @@
 
 [metadata.heroku]
   root-package = "github.com/auspicus/cs50-final"
-  go-version = "go1.11.1"
+  go-version = "go1.8.3"
   ensure = "false"
