@@ -1,1 +1,1 @@
-web: cs50
+web: make
