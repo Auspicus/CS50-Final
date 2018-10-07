@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 	"encoding/json"
+	"os"
 )
 
 type FibonacciBenchmark struct {
@@ -52,6 +53,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	port := os.Getenv("port")
+	if port == "" {
+		port = ":8080"
+	}
 	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(port, nil))
 }
