@@ -1,17 +1,24 @@
 import React, { Component } from 'react';
 import Helmet from 'react-helmet';
-import { XYPlot, YAxis, HorizontalGridLines, LineSeries } from 'react-vis';
-import 'react-vis/dist/style.css'
+import { FlexibleXYPlot, YAxis, HorizontalGridLines, LineSeries, DiscreteColorLegend } from 'react-vis';
+import 'react-vis/dist/style.css';
 
 const API = process.env.NODE_ENV == "production" ?
   'https://secret-thicket-57834.herokuapp.com' :
   'http://localhost:8080';
+
+
+const max = Math.pow(2, 31) - 1;
+const nanoseconds = 1;
+const microseconds = nanoseconds * 1000;
+const milliseconds = microseconds * 1000;
 
 class Graph extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      outliers: false,
       go: [],
       js: []
     }
@@ -39,10 +46,6 @@ class Graph extends Component {
       let fib2 = 1;
       let fib3 = 2;
       let l1 = 0;
-      const max = Math.pow(2, 31) - 1;
-      const nanoseconds = 1;
-      const microseconds = nanoseconds * 1000;
-      const milliseconds = microseconds * 1000;
     
       let before = performance.now();
       while (l1 < 1000 * 1000) {
@@ -60,11 +63,9 @@ class Graph extends Component {
       let after = performance.now();
       let benchmark = (after - before) * milliseconds;
 
-      if (benchmark !== 0) {
-        this.setState({
-          js: [...this.state.js, benchmark],
-        });
-      }
+      this.setState({
+        js: [...this.state.js, benchmark],
+      });
 
       setTimeout(() => {
         this.runJs();
@@ -78,29 +79,41 @@ class Graph extends Component {
   }
 
   render() {
+    const avgJs = this.state.js.reduce((a, b) => a + b, 0) / this.state.js.length / milliseconds;
+    const avgGo = this.state.go.reduce((a, b) => a + b, 0) / this.state.go.length / milliseconds;
     return (
-      <React.Fragment>
-        <h2>Benchmark (Go)</h2>
-        <XYPlot
-          margin={{ left: 60 }}
-          width={350}
+      <div style={{
+        margin: '0 auto',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          marginBottom: '2rem',
+        }}>
+          Go is running {((avgJs / avgGo) * 100).toFixed(0)}% faster than Javascript
+        </div>
+        <FlexibleXYPlot
+          yDomain={[0, 250]}
           height={300}>
           <HorizontalGridLines />
+          <DiscreteColorLegend items={[
+            {
+              title: 'Javascript',
+              color: 'red',
+            },
+            {
+              title: 'Go',
+              color: 'green',
+            }
+          ]} />
           <LineSeries
-            data={this.state.go.map((y, x) => ({ x, y: (y / (1000 * 1000)) }))} />
-          <YAxis title="Compute time (milliseconds)" />
-        </XYPlot>
-        <h2>Benchmark (Javascript)</h2>
-        <XYPlot
-          margin={{ left: 80 }}
-          width={350}
-          height={300}>
-          <HorizontalGridLines />
+            data={this.state.js.filter(y => !(y == 0 && this.state.outliers)).map((y, x) => ({ x, y: y / milliseconds }))}
+            color="red" />
           <LineSeries
-            data={this.state.js.map((y, x) => ({ x, y: (y / (1000 * 1000)) }))} />
+            data={this.state.go.map((y, x) => ({ x, y: y / milliseconds }))}
+            color="green" />
           <YAxis title="Compute time (milliseconds)" />
-        </XYPlot>
-      </React.Fragment>
+        </FlexibleXYPlot>
+      </div>
     );
   }
 }
@@ -112,13 +125,18 @@ class Home extends Component {
         <Helmet title="Go vs Javascript - Fibonacci" />
         <div style={{
           margin: '0 auto',
-          maxWidth: '960px'
+          maxWidth: '960px',
+          textAlign: 'center',
         }}>
-          <h1 style={{
-            textAlign: 'center'
-          }}>
+          <h1>
             Go vs Javascript - Fibonacci
           </h1>
+          <p>
+            While Javascript can be great for prototyping and UI interactions, it doesn't hold up as well when put under the microscope of performance. Here we have a benchmark of Go and Javascript calculating the Fibonacci series up to the max value of an integer (2^31 - 1) one million times. We can see that Go vastly outperforms Javascript here.
+          </p>
+          <p>
+            It's worth noting that the V8 engine (which Chrome uses to run Javascript in your browser) does a lot to optimize Javascript. In the context of this benchmark, V8 will often "optimize" the fibonacci function by caching the output of certain operations and so the process ends up taking virtually no time at all. These outlier benchmarks have been excluded for the purpose of comparison.
+          </p>
           <Graph />
         </div>
       </React.Fragment>
