@@ -1,0 +1,25 @@
+{
+  "name": "react-starter",
+  "version": "1.0.0",
+  "dependencies": {
+    "connected-react-router": "^4.3.0",
+    "marksy": "^6.0.3",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-helmet": "^5.2.0",
+    "react-redux": "^5.0.7",
+    "react-router-dom": "^4.2.2",
+    "react-scripts": "^1.1.4",
+    "react-snap": "^1.11.5",
+    "react-transition-group": "^1.2.1",
+    "react-vis": "^1.11.2",
+    "redux": "^4.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "postbuild": "react-snap",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
