@@ -30,6 +30,7 @@
   unused-packages = true
 
 [metadata.heroku]
-  root-package = "github.com/auspicus/cs50-final"
+  root-package = "cs50"
   go-version = "go1.8.3"
+  install = "./..."
   ensure = "false"
