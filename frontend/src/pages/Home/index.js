@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import Helmet from 'react-helmet';
 import { FlexibleXYPlot, YAxis, HorizontalGridLines, LineSeries, DiscreteColorLegend } from 'react-vis';
 import 'react-vis/dist/style.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 const API = process.env.NODE_ENV == "production" ?
   'https://secret-thicket-57834.herokuapp.com' :
@@ -81,6 +83,10 @@ class Graph extends Component {
   render() {
     const avgJs = this.state.js.reduce((a, b) => a + b, 0) / this.state.js.length / milliseconds;
     const avgGo = this.state.go.reduce((a, b) => a + b, 0) / this.state.go.length / milliseconds;
+    const centerJs = Math.floor(this.state.js.length / 2);
+    const centerGo = Math.floor(this.state.go.length / 2);
+    const medianJs = this.state.js.sort()[centerJs] / milliseconds;
+    const medianGo = this.state.go.sort()[centerGo] / milliseconds;
     return (
       <div style={{
         margin: '0 auto',
@@ -89,7 +95,7 @@ class Graph extends Component {
         <div style={{
           marginBottom: '2rem',
         }}>
-          Go is running {((avgJs / avgGo) * 100).toFixed(0)}% faster than Javascript
+          Go is running {((medianJs / medianGo) * 100).toFixed(0)}% faster than Javascript
         </div>
         <FlexibleXYPlot
           yDomain={[0, 250]}
@@ -113,6 +119,29 @@ class Graph extends Component {
             color="green" />
           <YAxis title="Compute time (milliseconds)" />
         </FlexibleXYPlot>
+        <table className="table" style={{
+          marginTop: '5rem'
+        }}>
+          <thead className="thead-dark">
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">Go</th>
+              <th scope="col">Javascript</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Average (ms)</th>
+              <td>{avgGo.toFixed(2)}</td>
+              <td>{avgJs.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <th scope="row">Median (ms)</th>
+              <td>{medianGo.toFixed(2)}</td>
+              <td>{medianJs.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     );
   }
@@ -128,7 +157,9 @@ class Home extends Component {
           maxWidth: '960px',
           textAlign: 'center',
         }}>
-          <h1>
+          <h1 style={{
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"'
+          }}>
             Go vs Javascript - Fibonacci
           </h1>
           <p>
