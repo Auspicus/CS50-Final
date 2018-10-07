@@ -53,10 +53,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	port := os.Getenv("port")
+	port := os.Getenv("PORT")
 	if port == "" {
-		port = ":8080"
+		port = "8080"
 	}
+	port = ":" + port
 	http.HandleFunc("/", handler)
 	log.Fatal(http.ListenAndServe(port, nil))
 }
